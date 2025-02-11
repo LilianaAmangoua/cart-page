@@ -3,13 +3,13 @@ package com.cart_page.cart_page.entities;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Orders {
+public class Order {
     private int orderId;
     private int userId;
     private BigDecimal total;
     private Date order_date;
 
-    public Orders(int orderId, int userId, BigDecimal total, Date order_date) {
+    public Order(int orderId, int userId, BigDecimal total, Date order_date) {
         this.orderId = orderId;
         this.userId = userId;
         this.total = total;

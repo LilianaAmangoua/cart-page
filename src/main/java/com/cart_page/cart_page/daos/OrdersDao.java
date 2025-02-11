@@ -1,9 +1,7 @@
 package com.cart_page.cart_page.daos;
 
-import com.cart_page.cart_page.entities.Orders;
-import com.cart_page.cart_page.entities.Product;
+import com.cart_page.cart_page.entities.Order;
 import com.cart_page.cart_page.exceptions.OrderNotFound;
-import com.cart_page.cart_page.exceptions.ProductNotFound;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -18,19 +16,19 @@ public class OrdersDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<Orders> ordersRowMapper = (rs, _) -> new Orders(
+    private final RowMapper<Order> ordersRowMapper = (rs, _) -> new Order(
             rs.getInt("orderId"),
             rs.getInt("userId"),
             rs.getBigDecimal("total"),
             rs.getDate("order_date")
     );
 
-    public List<Orders> findAll() {
+    public List<Order> findAll() { // Retourne toutes les commandes de tous les utilisateurs
         String sql = "SELECT * FROM orders";
         return jdbcTemplate.query(sql, ordersRowMapper);
     }
 
-    public Orders findByOrderId(int id) {
+    public Order findByOrderId(int id) { // Retourne une commande avec son total et la date
         String sql = "SELECT * FROM orders WHERE orderId = ?";
         return jdbcTemplate.query(sql, ordersRowMapper, id)
                 .stream()
@@ -38,7 +36,8 @@ public class OrdersDao {
                 .orElseThrow(() -> new OrderNotFound("Order Not Found : Commande avec l'ID : " + id + " n'existe pas"));
     }
 
-    public Orders findByUserId(int id) {
+
+    public Order findByUserId(int id) { // Retourne toutes les commandes d'un utilisateur
         String sql = "SELECT * FROM orders WHERE userId = ?";
         return jdbcTemplate.query(sql, ordersRowMapper, id)
                 .stream()
@@ -46,24 +45,21 @@ public class OrdersDao {
                 .orElseThrow(() -> new OrderNotFound("Order Not Found : User avec l'ID : " + id + " n'existe pas"));
     }
 
-    public Orders save(Orders order) {
-        String sql = "INSERT INTO orders (orderId, userId, total, order_date) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, order.getOrderId(), order.getUserId(), order.getTotal(), order.getOrder_date());
 
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
+    public Order save(Order newOrder) { // Ajoute une nouvelle commande d'un utilisateur
+        String sql = "INSERT INTO orders (userId, total, order_date) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, newOrder.getUserId(), newOrder.getTotal(), newOrder.getOrder_date());
 
-        order.setUserId(id);
-        return order;
+        return newOrder;
     }
 
-    public Orders update(int orderId, Orders order) {
+    public Order update(int orderId, Order order) { // Met à jour une commande d'un utilisateur
         if (!orderExists(orderId)) {
             throw new OrderNotFound("Commande avec l'ID : " + orderId + " n'existe pas");
         }
 
-        String sql = "UPDATE product SET orderId = ?, userId = ?, total = ?,order_date = ? WHERE orderId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, order.getOrderId(), order.getUserId(), order.getTotal(), order.getOrder_date(), orderId);
+        String sql = "UPDATE product SET userId = ?, total = ?,order_date = ? WHERE orderId = ?";
+        int rowsAffected = jdbcTemplate.update(sql, order.getUserId(), order.getTotal(), order.getOrder_date(), orderId);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Échec de la mise à jour de la commande avec l'ID : " + orderId);
@@ -72,9 +68,9 @@ public class OrdersDao {
         return this.findByOrderId(orderId);
     }
 
-    public boolean delete(int id) {
+    public boolean delete(int orderId) { // Supprime une commande d'un utilisateur
         String sql = "DELETE FROM orders WHERE orderId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
+        int rowsAffected = jdbcTemplate.update(sql, orderId);
         return rowsAffected > 0;
     }
 

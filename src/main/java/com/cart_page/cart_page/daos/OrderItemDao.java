@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -23,12 +24,12 @@ public class OrderItemDao {
             rs.getInt("quantity")
     );
 
-    public List<OrderItem> findAll() {
+    public List<OrderItem> findAll() { // Retourne tous les produits dans toutes les commandes sans préciser l'utilisateur
         String sql = "SELECT * FROM order_item";
         return jdbcTemplate.query(sql, orderItemRowMapper);
     }
 
-    public OrderItem findById(int productId, int orderId) {
+    public OrderItem findById(int productId, int orderId) { // Retourne la quantité d'un produit dans une commande en particulier
         String sql = "SELECT * FROM order_item WHERE productId = ? AND orderId = ?";
         return jdbcTemplate.query(sql, orderItemRowMapper, productId, orderId)
                 .stream()
@@ -36,14 +37,18 @@ public class OrderItemDao {
                 .orElseThrow(() -> new OrderItemNotFound("Order Item not found : Commande " + orderId + "avec le produit id : " + productId + " n'existe pas"));
     }
 
+    public OrderItem findByOrderId(int orderId){// Retourne tous les produits d'une commande
+        String sql = "SELECT * FROM order_item WHERE orderId = ?";
+        return  jdbcTemplate.query(sql, orderItemRowMapper, orderId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new OrderItemNotFound("Order Item not found : Commande avec l'id " + orderId + " n'existe pas"));
+    }
+
     public OrderItem save(OrderItem orderItem) {
         String sql = "INSERT INTO order_item (orderId, productId, quantity) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, orderItem.getOrderId(), orderItem.getProductId(), orderItem.getQuantity());
 
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-        orderItem.setProductId(id);
         return orderItem;
     }
 
@@ -52,8 +57,8 @@ public class OrderItemDao {
             throw new OrderItemNotFound("Order Item not found : Commande " + orderId + " avec le produit id : " + productId + " n'existe pas");
         }
 
-        String sql = "UPDATE order_item SET orderId = ?, productId = ?, quantity = ? WHERE productId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, orderItem.getOrderId(), orderItem.getProductId(), orderItem.getQuantity(), productId);
+        String sql = "UPDATE order_item SET orderId = ?, productId = ?, quantity = ? WHERE productId = ? AND orderId = ?";
+        int rowsAffected = jdbcTemplate.update(sql, orderItem.getOrderId(), orderItem.getProductId(), orderItem.getQuantity(), productId, orderId);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Échec de la mise à jour de la commande" + orderId + "avec le produit id : " + productId);
