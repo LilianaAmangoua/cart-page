@@ -28,6 +28,14 @@ public class UserDao {
         return jdbcTemplate.query(sql, userRowMapper);
     }
 
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM user WHERE email = ?";
+        return jdbcTemplate.query(sql, userRowMapper, email)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new UserNotFound("Utilisateur non trouvé"));
+    }
+
     public User findById(int id) {
         String sql = "SELECT * FROM user WHERE id = ?";
         return jdbcTemplate.query(sql, userRowMapper, id)
@@ -36,15 +44,10 @@ public class UserDao {
                 .orElseThrow(() -> new UserNotFound("User avec l'ID : " + id + " n'existe pas"));
     }
 
-    public User save(User user) {
+    public boolean save(User user) {
         String sql = "INSERT INTO user (email, password, role) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole());
-
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-       user.setId(id);
-        return user;
+        int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole());
+        return rowsAffected > 0;
     }
 
     public User update(int id, User user) {
