@@ -63,6 +63,11 @@ public class ProductDao {
         return this.findById(id);
     }
 
+    public List<Product> searchProduct(String query){
+        String sql = "SELECT * FROM product WHERE LOWER(name) LIKE LOWER(?) ";
+        return jdbcTemplate.query(sql,productRowMapper, "%" + query + "%");
+    }
+
     public boolean delete(int id) {
         String sql = "DELETE FROM product WHERE productId = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);

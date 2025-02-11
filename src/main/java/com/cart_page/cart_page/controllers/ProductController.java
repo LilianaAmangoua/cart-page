@@ -17,7 +17,7 @@ public class ProductController {
         this.productDao = productDao;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productDao.findAll());
     }
@@ -25,6 +25,11 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id) {
         return ResponseEntity.ok(productDao.findById(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProduct(@RequestParam String query){
+        return ResponseEntity.ok(productDao.searchProduct(query));
     }
 
     @PostMapping
