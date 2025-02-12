@@ -2,6 +2,7 @@ package com.cart_page.cart_page.controllers;
 
 import com.cart_page.cart_page.daos.ProductDao;
 import com.cart_page.cart_page.entities.Product;
+import com.cart_page.cart_page.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +13,11 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
     private final ProductDao productDao;
+    private final ProductService productService;
 
-    public ProductController(ProductDao productDao) {
+    public ProductController(ProductDao productDao, ProductService productService) {
         this.productDao = productDao;
+        this.productService = productService;
     }
 
     @GetMapping("/all")
@@ -25,6 +28,23 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id) {
         return ResponseEntity.ok(productDao.findById(id));
+    }
+
+    @PatchMapping("/{id}/quantity")
+    public ResponseEntity<?> decreaseStock(@PathVariable int id, @RequestParam int quantity){
+        Product product = productDao.findById(id);
+        boolean doesExists = productDao.productExists(product.getProductId());
+        if(!doesExists){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produit avec l'id " + id + " non trouvé");
+        }
+
+        if(!productService.isStockSufficient(product)){
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Stock épuisé");
+        }
+
+        Product newStockProduct = productService.decreaseStock(product, quantity);
+        return ResponseEntity.status(HttpStatus.OK).body(newStockProduct);
+
     }
 
     @GetMapping("/search")

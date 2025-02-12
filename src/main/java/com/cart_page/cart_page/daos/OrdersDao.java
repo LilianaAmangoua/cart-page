@@ -33,16 +33,13 @@ public class OrdersDao {
         return jdbcTemplate.query(sql, ordersRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new OrderNotFound("Order Not Found : Commande avec l'ID : " + id + " n'existe pas"));
+                .orElseThrow(() -> new OrderNotFound("Erreur: Order Not Found : Commande avec l'ID : " + id + " n'existe pas"));
     }
 
 
-    public Order findByUserId(int id) { // Returns a user's orders
+    public List<Order> findByUserId(int id) { // Returns a user's orders
         String sql = "SELECT * FROM orders WHERE userId = ?";
-        return jdbcTemplate.query(sql, ordersRowMapper, id)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new OrderNotFound("Order Not Found : User avec l'ID : " + id + " n'existe pas"));
+        return jdbcTemplate.query(sql, ordersRowMapper, id);
     }
 
 
@@ -60,14 +57,14 @@ public class OrdersDao {
 
     public Order update(int orderId, Order order) {
         if (!orderExists(orderId)) {
-            throw new OrderNotFound("Commande avec l'ID : " + orderId + " n'existe pas");
+            throw new OrderNotFound("Erreur: Commande avec l'ID : " + orderId + " n'existe pas");
         }
 
         String sql = "UPDATE product SET userId = ?, total = ?,order_date = ? WHERE orderId = ?";
         int rowsAffected = jdbcTemplate.update(sql, order.getUserId(), order.getTotal(), order.getOrder_date(), orderId);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Échec de la mise à jour de la commande avec l'ID : " + orderId);
+            throw new RuntimeException("Erreur: Échec de la mise à jour de la commande avec l'ID : " + orderId);
         }
 
         return this.findByOrderId(orderId);

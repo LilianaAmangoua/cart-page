@@ -35,7 +35,7 @@ public class ProductDao {
         return jdbcTemplate.query(sql, productRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ProductNotFound("Product Not Found : Produit avec l'ID : " + id + " n'existe pas"));
+                .orElseThrow(() -> new ProductNotFound("Erreur : Produit avec l'ID : " + id + " n'existe pas"));
     }
 
     public Product save(Product product) {
@@ -51,14 +51,14 @@ public class ProductDao {
 
     public Product update(int id, Product product) {
         if (!productExists(id)) {
-            throw new ProductNotFound("Product Not Found : Produit avec l'ID : " + id + " n'existe pas");
+            throw new ProductNotFound("Erreur: Product Not Found : Produit avec l'ID : " + id + " n'existe pas");
         }
 
         String sql = "UPDATE product SET name = ?, price = ?, stock = ?, product_description = ?, image = ? WHERE productId = ?";
         int rowsAffected = jdbcTemplate.update(sql, product.getName(), product.getPrice(), product.getStock(), product.getDescription(), product.getImage(), id);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);
+            throw new RuntimeException("Erreur: Échec de la mise à jour du produit avec l'ID : " + id);
         }
 
         return this.findById(id);
@@ -75,7 +75,7 @@ public class ProductDao {
         return rowsAffected > 0;
     }
 
-    private boolean productExists(int id) {
+    public boolean productExists(int id) {
         String checkSql = "SELECT COUNT(*) FROM product WHERE productId = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;

@@ -24,13 +24,13 @@ public class OrdersController {
         return ResponseEntity.ok(ordersDao.findAll());
     }
 
-    @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderByOrderId(@PathVariable int orderId) {
-        return ResponseEntity.ok(ordersDao.findByOrderId(orderId));
-    }
+//    @GetMapping("/{orderId}")
+//    public ResponseEntity<Order> getOrderByOrderId(@PathVariable int orderId) {
+//        return ResponseEntity.ok(ordersDao.findByOrderId(orderId));
+//    }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Order> getOrderByUserId(@PathVariable int userId){
+    public ResponseEntity<List<Order>> getOrderByUserId(@PathVariable int userId){
         return ResponseEntity.ok(ordersDao.findByUserId(userId));
     }
 
