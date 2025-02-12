@@ -21,7 +21,8 @@ public class ProductDao {
             rs.getString("name"),
             rs.getBigDecimal("price"),
             rs.getInt("stock"),
-            rs.getString("product_description")
+            rs.getString("product_description"),
+            rs.getString("image")
     );
 
     public List<Product> findAll() {
@@ -38,8 +39,8 @@ public class ProductDao {
     }
 
     public Product save(Product product) {
-        String sql = "INSERT INTO product (name, price, stock, product_description) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, product.getName(), product.getPrice(), product.getStock(), product.getDescription());
+        String sql = "INSERT INTO product (name, price, stock, product_description, image) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, product.getName(), product.getPrice(), product.getStock(), product.getDescription(), product.getImage());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
@@ -53,8 +54,8 @@ public class ProductDao {
             throw new ProductNotFound("Product Not Found : Produit avec l'ID : " + id + " n'existe pas");
         }
 
-        String sql = "UPDATE product SET name = ?, price = ?, stock = ?, product_description = ? WHERE productId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, product.getName(), product.getPrice(), product.getStock(), product.getDescription(), id);
+        String sql = "UPDATE product SET name = ?, price = ?, stock = ?, product_description = ?, image = ? WHERE productId = ?";
+        int rowsAffected = jdbcTemplate.update(sql, product.getName(), product.getPrice(), product.getStock(), product.getDescription(), product.getImage(), id);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);

@@ -2,6 +2,7 @@ package com.cart_page.cart_page.controllers;
 
 import com.cart_page.cart_page.daos.UserDao;
 import com.cart_page.cart_page.entities.User;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +29,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userDao.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
+        boolean isSaved = userDao.save(user);
+
+        if (isSaved) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("L'utilisateur n'a pas pu être créé.");
+        }
     }
 
     @PutMapping("/{id}")

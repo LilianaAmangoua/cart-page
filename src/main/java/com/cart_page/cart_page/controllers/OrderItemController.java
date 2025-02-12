@@ -2,6 +2,7 @@ package com.cart_page.cart_page.controllers;
 
 import com.cart_page.cart_page.daos.OrderItemDao;
 import com.cart_page.cart_page.entities.OrderItem;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class OrderItemController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderItem> createOrderItem(@RequestBody OrderItem orderItem) {
+    public ResponseEntity<OrderItem> createOrderItem(@Valid @RequestBody OrderItem orderItem) {
         OrderItem createdOrderItem = orderItemDao.save(orderItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderItem);
     }

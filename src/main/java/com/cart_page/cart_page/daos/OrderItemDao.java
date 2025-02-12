@@ -24,12 +24,12 @@ public class OrderItemDao {
             rs.getInt("quantity")
     );
 
-    public List<OrderItem> findAll() { // Retourne tous les produits dans toutes les commandes sans préciser l'utilisateur
+    public List<OrderItem> findAll() { // Returns all products bought by all users
         String sql = "SELECT * FROM order_item";
         return jdbcTemplate.query(sql, orderItemRowMapper);
     }
 
-    public OrderItem findById(int productId, int orderId) { // Retourne la quantité d'un produit dans une commande en particulier
+    public OrderItem findById(int productId, int orderId) { // Returns a product's quantity in an order
         String sql = "SELECT * FROM order_item WHERE productId = ? AND orderId = ?";
         return jdbcTemplate.query(sql, orderItemRowMapper, productId, orderId)
                 .stream()
@@ -37,7 +37,7 @@ public class OrderItemDao {
                 .orElseThrow(() -> new OrderItemNotFound("Order Item not found : Commande " + orderId + "avec le produit id : " + productId + " n'existe pas"));
     }
 
-    public OrderItem findByOrderId(int orderId){// Retourne tous les produits d'une commande
+    public OrderItem findByOrderId(int orderId){ // Returns all products of an order
         String sql = "SELECT * FROM order_item WHERE orderId = ?";
         return  jdbcTemplate.query(sql, orderItemRowMapper, orderId)
                 .stream()

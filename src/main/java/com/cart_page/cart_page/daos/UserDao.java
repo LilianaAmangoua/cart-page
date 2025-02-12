@@ -51,7 +51,7 @@ public class UserDao {
     }
 
     public User update(int id, User user) {
-        if (!userExists(id)) {
+        if (!userExistsById(id)) {
             throw new UserNotFound("User avec l'ID : " + id + " n'existe pas");
         }
 
@@ -71,9 +71,14 @@ public class UserDao {
     }
 
 
-    private boolean userExists(int id) {
+    private boolean userExistsById(int id) {
         String checkSql = "SELECT COUNT(*) FROM user WHERE id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;
+    }
+
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, email) > 0;
     }
 }

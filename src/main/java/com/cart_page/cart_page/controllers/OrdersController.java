@@ -2,9 +2,12 @@ package com.cart_page.cart_page.controllers;
 
 import com.cart_page.cart_page.daos.OrdersDao;
 import com.cart_page.cart_page.entities.Order;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -16,34 +19,39 @@ public class OrdersController {
         this.ordersDao = ordersDao;
     }
 
-    /*@GetMapping
+    @GetMapping("/all") // Admin mapping
     public ResponseEntity<List<Order>> getAllOrders() {
         return ResponseEntity.ok(ordersDao.findAll());
-    }*/
+    }
 
-    @GetMapping("/{orderId}") // Retourne une commande avec son total et la date
+    @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderByOrderId(@PathVariable int orderId) {
         return ResponseEntity.ok(ordersDao.findByOrderId(orderId));
     }
 
-    @GetMapping("/{userId}") // Retourne toutes les commandes d'un utilisateur
+    @GetMapping("/{userId}")
     public ResponseEntity<Order> getOrderByUserId(@PathVariable int userId){
         return ResponseEntity.ok(ordersDao.findByUserId(userId));
     }
 
-    @PostMapping // Ajoute une nouvelle commande d'un utilisateur
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+    @GetMapping("/{userId}/search")
+    public ResponseEntity<List<Order>> searchProduct(@PathVariable int userId, @RequestParam String query){
+        return ResponseEntity.ok(ordersDao.searchOrder(query, userId));
+    }
+
+    @PostMapping
+    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) {
         Order createdOrder = ordersDao.save(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
-    @PutMapping("/{orderId}") // Met à jour une commande d'un utilisateur
+    @PutMapping("/{orderId}")
     public ResponseEntity<Order> updateOrder(@PathVariable int orderId, @RequestBody Order order) {
         Order updatedOrder = ordersDao.update(orderId, order);
         return ResponseEntity.ok(updatedOrder);
     }
 
-    @DeleteMapping("/{orderId}") // Supprime une commande d'un utilisateur
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable int orderId) {
         if (ordersDao.delete(orderId)) {
             return ResponseEntity.noContent().build();

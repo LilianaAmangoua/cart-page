@@ -1,9 +1,17 @@
 package com.cart_page.cart_page.entities;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class User {
     private int id;
+
+    @NotBlank(message = "Le mail ne peut pas être vide.")
     private String email;
+
+    @NotBlank(message = "Le mot de passe ne peut pas être vide.")
     private String password;
+
+    @NotBlank(message = "Le rôle ne peut pas être vide.")
     private String role;
 
     public User(){

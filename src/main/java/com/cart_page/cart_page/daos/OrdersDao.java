@@ -23,12 +23,12 @@ public class OrdersDao {
             rs.getDate("order_date")
     );
 
-    public List<Order> findAll() { // Retourne toutes les commandes de tous les utilisateurs
+    public List<Order> findAll() { // Returns all orders of all users
         String sql = "SELECT * FROM orders";
         return jdbcTemplate.query(sql, ordersRowMapper);
     }
 
-    public Order findByOrderId(int id) { // Retourne une commande avec son total et la date
+    public Order findByOrderId(int id) { // Returns an order with its total and the date of purchase
         String sql = "SELECT * FROM orders WHERE orderId = ?";
         return jdbcTemplate.query(sql, ordersRowMapper, id)
                 .stream()
@@ -37,7 +37,7 @@ public class OrdersDao {
     }
 
 
-    public Order findByUserId(int id) { // Retourne toutes les commandes d'un utilisateur
+    public Order findByUserId(int id) { // Returns a user's orders
         String sql = "SELECT * FROM orders WHERE userId = ?";
         return jdbcTemplate.query(sql, ordersRowMapper, id)
                 .stream()
@@ -46,14 +46,19 @@ public class OrdersDao {
     }
 
 
-    public Order save(Order newOrder) { // Ajoute une nouvelle commande d'un utilisateur
+    public Order save(Order newOrder) {
         String sql = "INSERT INTO orders (userId, total, order_date) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, newOrder.getUserId(), newOrder.getTotal(), newOrder.getOrder_date());
 
         return newOrder;
     }
 
-    public Order update(int orderId, Order order) { // Met à jour une commande d'un utilisateur
+    public List<Order> searchOrder(String query, int userId){
+        String sql = "SELECT * FROM orders WHERE orderId LIKE ? AND userId = ? ";
+        return jdbcTemplate.query(sql,ordersRowMapper, "%" + query + "%", userId);
+    }
+
+    public Order update(int orderId, Order order) {
         if (!orderExists(orderId)) {
             throw new OrderNotFound("Commande avec l'ID : " + orderId + " n'existe pas");
         }
@@ -68,7 +73,7 @@ public class OrdersDao {
         return this.findByOrderId(orderId);
     }
 
-    public boolean delete(int orderId) { // Supprime une commande d'un utilisateur
+    public boolean delete(int orderId) {
         String sql = "DELETE FROM orders WHERE orderId = ?";
         int rowsAffected = jdbcTemplate.update(sql, orderId);
         return rowsAffected > 0;
