@@ -30,7 +30,7 @@ public class ProductController {
         return ResponseEntity.ok(productDao.findById(id));
     }
 
-    @PatchMapping("/{id}/quantity")
+    @PatchMapping("/{id}/decrease")
     public ResponseEntity<?> decreaseStock(@PathVariable int id, @RequestParam int quantity){
         Product product = productDao.findById(id);
         boolean doesExists = productDao.productExists(product.getProductId());
@@ -46,6 +46,24 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(newStockProduct);
 
     }
+
+    @PatchMapping("/{id}/increase")
+    public ResponseEntity<?> increaseStock(@PathVariable int id, @RequestParam int quantity){
+        Product product = productDao.findById(id);
+        boolean doesExists = productDao.productExists(product.getProductId());
+        if(!doesExists){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produit avec l'id " + id + " non trouvé");
+        }
+
+        if(!productService.isStockSufficient(product)){
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Stock épuisé");
+        }
+
+        Product newStockProduct = productService.increaseStock(product, quantity);
+        return ResponseEntity.status(HttpStatus.OK).body(newStockProduct);
+
+    }
+
 
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchProduct(@RequestParam String query){

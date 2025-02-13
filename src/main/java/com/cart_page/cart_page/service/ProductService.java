@@ -14,10 +14,10 @@ public class ProductService {
         this.productDao = productDao;
     }
 
-    public void increaseStock(Product productToFind, int quantity){
+    public Product increaseStock(Product productToFind, int quantity){
         Product product = productDao.findById(productToFind.getProductId());
         product.setStock(product.getStock() + quantity);
-        productDao.save(product);
+        return productDao.update(product.getProductId(), product);
     }
 
     public Product decreaseStock(Product productToFind, int quantity){
@@ -32,7 +32,7 @@ public class ProductService {
         }
 
         product.setStock(product.getStock() - quantity);
-        return productDao.save(product);
+        return productDao.update(product.getProductId(), product);
     }
 
     public boolean isStockSufficient(Product product){

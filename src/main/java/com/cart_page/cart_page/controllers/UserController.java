@@ -18,7 +18,7 @@ public class UserController {
         this.userDao = userDao;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userDao.findAll());
     }
@@ -26,6 +26,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable int id) {
         return ResponseEntity.ok(userDao.findById(id));
+    }
+
+    @GetMapping("/allEmails")
+    public ResponseEntity<?> findUserEmail(){
+       return ResponseEntity.ok(userDao.getUserEmails());
     }
 
     @PostMapping

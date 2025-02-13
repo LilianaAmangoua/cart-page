@@ -4,8 +4,12 @@ import com.cart_page.cart_page.entities.Order;
 import com.cart_page.cart_page.exceptions.OrderNotFound;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -42,10 +46,27 @@ public class OrdersDao {
         return jdbcTemplate.query(sql, ordersRowMapper, id);
     }
 
-
     public Order save(Order newOrder) {
         String sql = "INSERT INTO orders (userId, total, order_date) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, newOrder.getUserId(), newOrder.getTotal(), newOrder.getOrder_date());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, newOrder.getUserId());
+            ps.setBigDecimal(2, newOrder.getTotal());
+            java.util.Date utilDate = newOrder.getOrder_date();
+            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+            ps.setDate(3, sqlDate);
+
+            return ps;
+        }, keyHolder);
+
+        if (keyHolder.getKey() != null) {
+            newOrder.setOrderId(keyHolder.getKey().intValue());
+        } else {
+            throw new RuntimeException("Échec de la récupération de l'id de la commande");
+        }
 
         return newOrder;
     }

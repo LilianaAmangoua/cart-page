@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class UserDao {
@@ -44,6 +46,14 @@ public class UserDao {
                 .orElseThrow(() -> new UserNotFound("User avec l'ID : " + id + " n'existe pas"));
     }
 
+    public List<Map<String, Object>> getUserEmails(){
+        String sql = "SELECT user.email, orders.orderId, orders.total, orders.order_date\n" +
+                "FROM user\n" +
+                "INNER JOIN orders ON user.id = orders.userId\n" +
+                "WHERE user.role = 'USER'";
+        return jdbcTemplate.queryForList(sql);
+    }
+
     public boolean save(User user) {
         String sql = "INSERT INTO user (email, password, role) VALUES (?, ?, ?)";
         int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole());
@@ -71,7 +81,7 @@ public class UserDao {
     }
 
 
-    private boolean userExistsById(int id) {
+    public boolean userExistsById(int id) {
         String checkSql = "SELECT COUNT(*) FROM user WHERE id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;
