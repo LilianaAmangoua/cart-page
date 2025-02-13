@@ -1,5 +1,6 @@
 package com.cart_page.cart_page.security;
 
+import com.cart_page.cart_page.entities.JwtToken;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -24,14 +25,15 @@ public class JwtUtil {
     }
 
 
-    public String generateToken(String email, int id) {
-        return Jwts.builder()
+    public JwtToken generateToken(String email, int id) {
+        String token = Jwts.builder()
                 .setSubject(email)
                 .claim("id", id) // To return the id in the token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+        return new JwtToken(token);
     }
 
     public String getEmailFromToken(String token) {

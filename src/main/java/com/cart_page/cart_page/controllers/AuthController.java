@@ -1,6 +1,7 @@
 package com.cart_page.cart_page.controllers;
 
 import com.cart_page.cart_page.daos.UserDao;
+import com.cart_page.cart_page.entities.JwtToken;
 import com.cart_page.cart_page.entities.User;
 import com.cart_page.cart_page.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String authenticateUser(@RequestBody User user) {
+    public ResponseEntity<JwtToken> authenticateUser(@RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
@@ -56,7 +57,8 @@ public class AuthController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         User userWithId = userDao.findByEmail(user.getEmail());
-        return jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId());
+        JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId());
+        return ResponseEntity.ok(jwtToken);
     }
 
 }
